@@ -93,6 +93,9 @@ public class ResourceDiscoveryServer {
                     sb.append(serviceReg);
                     sb.append("\n");
                 }
+                if( sb.length()==0 ){
+                    sb.append("\n");
+                }
                 return sb.toString();
             default:
                  return null;
