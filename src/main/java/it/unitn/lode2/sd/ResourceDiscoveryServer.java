@@ -76,21 +76,20 @@ public class ResourceDiscoveryServer {
     private String parse(String s) throws IOException {
         s = s.replace("\n", "");
         s = s.replace("\r", "");
-        List<String> tkns = Arrays.asList(s.split(" "));
-        String command = tkns.get(0);
+        Queue<String> queue = new LinkedList<>();
+        queue.addAll(Arrays.asList(s.split(" ")));
+        String command = queue.poll();
         switch( command ){
             case "REGISTER":
-                String service = tkns.get(1);
-                String host = tkns.get(2);
-                Integer port = Integer.parseInt(tkns.get(3));
-                register(service, host, port);
-                return "OK\n";
+                if( register(queue) ){
+                    return "OK\n";
+                } else {
+                    return "ERROR\n";
+                }
             case "QUERY":
-                service = tkns.get(1);
-                List<String> services = query(service);
                 StringBuffer sb = new StringBuffer();
-                for( String serviceReg: services ){
-                    sb.append(serviceReg);
+                for( ServiceRegistration registration: query(queue) ){
+                    sb.append(registration.getHost() + " " + registration.getPort());
                     sb.append("\n");
                 }
                 if( sb.length()==0 ){
@@ -98,22 +97,21 @@ public class ResourceDiscoveryServer {
                 }
                 return sb.toString();
             default:
-                 return null;
+                return null;
         }
-
     }
 
-    private void register(String serviceName, String host, Integer port){
-        ServiceRegister.register(servicesMap.get(serviceName), host, port);
+    private Boolean register(Queue<String> queue) {
+        Class<? extends Service> service = servicesMap.get(queue.poll());
+        String host = queue.poll();
+        Integer port = Integer.parseInt(queue.poll());
+        ServiceRegister.register(service, host, port);
+        return Boolean.TRUE;
     }
 
-    private List<String> query(String serviceName){
-        List<ServiceRegistration> registrations = ServiceRegister.query(servicesMap.get(serviceName));
-        List<String> services = new ArrayList<>();
-        for( ServiceRegistration registration: registrations ){
-            services.add(registration.getHost() + " " + registration.getPort());
-        }
-        return services;
+    private List<ServiceRegistration> query(Queue<String> queue) {
+        Class<? extends Service> service = servicesMap.get(queue.poll());
+        return ServiceRegister.query(service);
     }
 
 }
