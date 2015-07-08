@@ -29,9 +29,7 @@ public class ResourceDiscoveryServer {
     }
 
     public static ResourceDiscoveryServer build() throws SocketException {
-        ResourceDiscoveryServer server = new ResourceDiscoveryServer();
-        server.socket = new DatagramSocket(SERVER_PORT);
-        return server;
+        return build(SERVER_PORT);
     }
 
     public static ResourceDiscoveryServer build(int port) throws SocketException {
@@ -67,11 +65,6 @@ public class ResourceDiscoveryServer {
 
         }
     }
-
-    // REGISTER CAMERA 192.168.1.3 9998 WITH PAN, TILT, ZOOM
-    // REGISTER CAMERA 192.168.1.3 9998
-    // QUERY CAMERA
-    // QUERY CAMERA WITH PAN, TILT
 
     private String parse(String s) throws IOException {
         s = s.replace("\n", "");
